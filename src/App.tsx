@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ChevronUp, Leaf, Zap, Recycle, Users, Mail, Phone, Globe, ArrowRight, Play, Target, TrendingUp } from 'lucide-react';
+import emailjs from 'emailjs-com';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
@@ -577,11 +578,29 @@ const App = () => {
       email: '',
       message: ''
     });
+    const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>("idle");
+    const [errorMsg, setErrorMsg] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    useEffect(() => {
+      emailjs.init('m4gEoizTa3mlw9peT');
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      console.log('Form submitted:', formData);
-      // Handle form submission here
+      setStatus('sending');
+      setErrorMsg('');
+      try {
+        await emailjs.send('service_08wuxti', 'template_lzj1ykm', {
+          from_name: formData.name,
+          from_email: formData.email,
+          message: formData.message,
+        });
+        setStatus('success');
+        setFormData({ name: '', email: '', message: '' });
+      } catch (error) {
+        setStatus('error');
+        setErrorMsg('Failed to send message. Please try again later.');
+      }
     };
 
     return (
@@ -608,7 +627,7 @@ const App = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Email</h4>
-                    <p className="text-gray-600">bhardwajhritik68@gmail.com</p>
+                    <p className="text-gray-600">harshgupta3732@gmail.com</p>
                   </div>
                 </div>
                 
@@ -618,7 +637,7 @@ const App = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Phone</h4>
-                    <p className="text-gray-600">+91 8829028163</p>
+                    <p className="text-gray-600">9257650180</p>
                   </div>
                 </div>
                 
@@ -628,7 +647,11 @@ const App = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Instagram</h4>
-                    <p className="text-gray-600">@harsh.bhati_07</p>
+                    <p className="text-gray-600">
+                      <a href="https://www.instagram.com/harsh_gupta_9410/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">
+                        @harsh_gupta_9410
+                      </a>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -705,12 +728,18 @@ const App = () => {
                   />
                 </div>
                 
+                {status === 'success' && (
+                  <div className="text-green-600 font-semibold">Message sent successfully!</div>
+                )}
+                {status === 'error' && (
+                  <div className="text-red-600 font-semibold">{errorMsg}</div>
+                )}
                 <button
                   type="submit"
                   className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105"
+                  disabled={status === 'sending'}
                 >
-                  Send Message
-                  <ArrowRight className="inline ml-2 h-5 w-5" />
+                  {status === 'sending' ? 'Sending...' : (<><span>Send Message</span><ArrowRight className="inline ml-2 h-5 w-5" /></>)}
                 </button>
               </form>
             </div>
